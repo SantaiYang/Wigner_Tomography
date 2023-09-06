@@ -111,6 +111,9 @@ class parityMapping:
         tol: tolerance of the error
         TODO: calling find_optimal_time() here could waste time, this function should probably take the optimal time as an input
         TODO: is this the optimal time always less than pi/2chi? does the find optimal time here always work?
+        For dispersive_rot and dispersive H, can set the tolerance very small. Smaller the tolerance, more accurate the optimal time. All smaller than pi/2chi
+        For two_level_rot, the smallest possible tolerance is 0.002, and the optimal time is slightly smaller than pi/2*chi (by 1ns)
+        For two_level, the smallest possible tolerance is 0.002, and the optimal time is much smaller than pi/2chi (by 130ns)
         '''
         chi = self.g**2/(np.abs(self.wa - self.wc))
         t_range = np.linspace(0, np.pi/(2*chi), 40000)
@@ -153,7 +156,7 @@ class parityMapping:
         #ax.scatter(angle, np.amax(diff), color = 'r')
         return angle
     
-    def parity_mapping(self, psi0, alpha, name, angle, tlist, tol = 0.001, two_level_approx = True):
+    def parity_mapping(self, psi0, alpha, name, angle, tlist, two_level_approx = True):
         '''This function returns the wigner value through parity mapping at alpha
         psi0: the initially prepared state without displacement
         alpha: displacement
@@ -356,7 +359,7 @@ def reconstruct_density_matrix(name, psi0, new_disps, FD, pmap: parityMapping, t
     '''
     Nph = FD
     if simulation:
-        wig_vals = pmap.run(psi0, new_disps, name, tol = tol)
+        wig_vals = pmap.run(psi0, new_disps, name, tol = tol, two_level_approx = two_level_approx)
     else:
         wig_vals = wig_vals
     x_list = np.real(wig_vals)
@@ -367,7 +370,7 @@ def reconstruct_density_matrix(name, psi0, new_disps, FD, pmap: parityMapping, t
     pseudo = Qobj(pseudo)
     return pseudo
 
-def gn(rho, n, pmap: parityMapping):
+def gn(rho, n, N_cav, N_qubit):
     '''
     This function calculates the n-th order coherence of light
     rho: density matrix/state vector of system
@@ -375,8 +378,9 @@ def gn(rho, n, pmap: parityMapping):
     TODO: since pmap is only used here to get the creation/annihilation operators I think you can probably just have an argument for N_cav and create
     the operators within this function. Otherwise a user has to create a whole parityMapping object just to use the a and a.dag()
     '''
-    numerator = expect(pmap.a.dag()**n * pmap.a**n, rho)
-    denom = (expect(pmap.a.dag() * pmap.a, rho))**n
+    a = tensor(destroy(self.N_cav), qeye(self.N_qb))
+    numerator = expect(a.dag()**n * a**n, rho)
+    denom = (expect(a.dag() * a, rho))**n
     return numerator/denom
 
 
