@@ -17,7 +17,7 @@ import time
 
 
 class parityMapping:
-    def __init__(self, wc, wa, g, N_cav, N_qb, gamma_phase, gamma_qubit):
+    def __init__(self, wc, wa, g, N_cav, N_qb, gamma_phase, gamma_qubit, al=0.0):
         self.wc = wc
         self.wa = wa
         self.g = g
@@ -25,6 +25,7 @@ class parityMapping:
         self.N_qb = N_qb
         self.gamma_phase = gamma_phase
         self.gamma_qubit = gamma_qubit
+        self.al = al
         
     def a(self):
         """Returns the photon annilihation operator for the cavity"""
@@ -67,7 +68,7 @@ class parityMapping:
         if name == 'two_level':
             return self.wc * self.a().dag() * self.a() + 1/2 * self.wa * self.sz() + self.g * (self.a().dag() + self.a()) * (self.sm() + self.sm().dag())
         if name == 'general':
-            return (self.wc - self.wa) * self.a.dag() * self.a - al/2 * self.sm.dag() * self.sm.dag() * self.sm * self.sm + self.g * (self.a * self.sm.dag() + self.a.dag() * self.sm())
+            return (self.wc - self.wa) * self.a.dag() * self.a - self.al/2 * self.sm.dag() * self.sm.dag() * self.sm * self.sm + self.g * (self.a * self.sm.dag() + self.a.dag() * self.sm())
         else:
             raise Exception("Invalid name. Please choose from dispersive_rot, dispersive, rot_two_level, two_level, and general")
     
