@@ -109,6 +109,8 @@ class parityMapping:
         This function returns the proper angle theta for sigma_theta which we need to take the expectation value of
         name: the name of Hamiltonian
         tol: tolerance of the error
+        TODO: calling find_optimal_time() here could waste time, this function should probably take the optimal time as an input
+        TODO: is this the optimal time always less than pi/2chi? does the find optimal time here always work?
         '''
         chi = self.g**2/(np.abs(self.wa - self.wc))
         t_range = np.linspace(0, np.pi/(2*chi), 40000)
@@ -159,6 +161,7 @@ class parityMapping:
         c_ops: Collapse Operator
         tol: tolerance that you can accept when finding the optimal parity mapping time
         two_level_approx: if we only consider two levels in the qubit. If not, we limit our discussion to three-level qubit
+        TODO: tolerance appears to be unused here so it can be removed from the arguments
         '''
         N = self.N_cav
         M = self.N_qb
@@ -349,6 +352,7 @@ def reconstruct_density_matrix(name, psi0, new_disps, FD, pmap: parityMapping, t
     FD: Number of levels in cavity that we choose to consider when constructing the density matrix
     tol: tolerance of error involved in finding optimal time & angle
     two_level_approx: if we only consider two levels in the qubit
+    TODO: looks like two_level_approx argument is unused here
     '''
     Nph = FD
     if simulation:
@@ -368,6 +372,8 @@ def gn(rho, n, pmap: parityMapping):
     This function calculates the n-th order coherence of light
     rho: density matrix/state vector of system
     n: The order of coherence 
+    TODO: since pmap is only used here to get the creation/annihilation operators I think you can probably just have an argument for N_cav and create
+    the operators within this function. Otherwise a user has to create a whole parityMapping object just to use the a and a.dag()
     '''
     numerator = expect(pmap.a.dag()**n * pmap.a**n, rho)
     denom = (expect(pmap.a.dag() * pmap.a, rho))**n
