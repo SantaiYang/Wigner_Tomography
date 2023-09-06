@@ -104,7 +104,7 @@ class parityMapping:
                 return tlist[i]
         return ('increase the number of ts in tlist')
     
-    def find_optimal_theta(self, name, tol):
+    def find_optimal_theta(self, name, optimal_t, tol):
         '''
         This function returns the proper angle theta for sigma_theta which we need to take the expectation value of
         name: the name of Hamiltonian
@@ -115,13 +115,10 @@ class parityMapping:
         For two_level_rot, the smallest possible tolerance is 0.002, and the optimal time is slightly smaller than pi/2*chi (by 1ns)
         For two_level, the smallest possible tolerance is 0.002, and the optimal time is much smaller than pi/2chi (by 130ns)
         '''
-        chi = self.g**2/(np.abs(self.wa - self.wc))
-        t_range = np.linspace(0, np.pi/(2*chi), 40000)
-        tf = self.find_optimal_time(t_range, name, tol = tol)
         if name == 'dispersive_rot':
             tlist = np.linspace(0, np.pi/(2*chi), 3000) 
         else:
-            tlist = np.linspace(0, tf, 3000) 
+            tlist = np.linspace(0, optimal_t, 3000) 
         # Even fock state
         N = self.N_cav
         M = self.N_qb
@@ -194,18 +191,18 @@ class parityMapping:
     
     def run(self, psi0, optimized_alphas, name, tol = 0.001, two_level_approx = True):
         '''This function returns the array of wigner values at optimized chosen alphas'''
-        angle = self.find_optimal_theta(name, tol = tol)
-        chi = self.g**2/(np.abs(self.wa - self.wc))
         t_range = np.linspace(0, np.pi/(2*chi), 40000)
+        optimal_t = self.find_optimal_time(t_range, name, tol = tol)
+        angle = self.find_optimal_theta(name, optimal_t, tol = tol)
+        chi = self.g**2/(np.abs(self.wa - self.wc))
         if name == 'dispersive_rot':
             tlist = np.linspace(0, np.pi/(2*chi), 3000)
         else:
-            tf = self.find_optimal_time(t_range, name, tol = tol)
-            tlist = np.linspace(0, tf, 3000)
+            tlist = np.linspace(0, optimal_t, 3000)
         
         wig_vals = []
         for aid, alpha in enumerate(optimized_alphas):
-            wig = self.parity_mapping(psi0, alpha, name, angle, tlist, tol = tol, two_level_approx = two_level_approx)
+            wig = self.parity_mapping(psi0, alpha, name, angle, tlist, two_level_approx = two_level_approx)
             wig_vals.append(wig)
             if aid % 10 == 0:
                 print(aid)
